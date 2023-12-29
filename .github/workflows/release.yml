@@ -10,6 +10,7 @@ permissions: read-all
 jobs:
   source:
     name: Source Code Releasing
+    if: ${{ github.repository == 'mruby/mruby' }}
     permissions:
       contents: write
     runs-on: ubuntu-22.04
@@ -17,13 +18,13 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - name: "Checkout ${{ github.ref }} ( ${{ github.sha }} )"
+      - name: "Checkout ${{ github.ref_name }} ( ${{ github.sha }} )"
         uses: actions/checkout@v4
       - name: Builds
         id: builds
         run: |
-          tag=$(echo "$GITHUB_REF" | sed 's@^refs/tags/@@')
-          packagename="mruby-$tag"
+          tagname="$GITHUB_REF_NAME"
+          packagename="mruby-$tagname"
           destdir=packages
 
           mkdir -p "$destdir"
@@ -39,7 +40,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          #draft: true
-          prerelease: ${{ contains(github.ref, '-rc') }}
+          # draft: true
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
           body_path: NEWS
           files: packages/*
